@@ -30,30 +30,21 @@ main()
 
 #Scan usernames from QR reader RETURN username
 def readUsr():
-    #read username from qr code using cam
-    cap = cv2.VideoCapture(0)
-	# QR code detection object
-	detector = cv2.QRCodeDetector()
-
-	while True:
-    	# get the image
-    	_, img = cap.read()
-    	# get bounding box coords and data
-    	data, bbox, _ = detector.detectAndDecode(img)
-    
-    	# if there is a bounding box, draw one, along with the data
-    	if(bbox is not None):
-        	for i in range(len(bbox)):
-            	cv2.line(img, tuple(bbox[i][0]), tuple(bbox[(i+1) % len(bbox)][0]), color=(255,
-                     0, 255), thickness=2)
-        	cv2.putText(img, data, (int(bbox[0][0][0]), int(bbox[0][0][1]) - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5, (0, 255, 0), 2)
-        	if data:
-            	print("data found: ", data)
-    	# display the image preview
-    	cv2.imshow("code detector", img)
-    	if(cv2.waitKey(1) == ord("q")):
-        	break
+    camera = cv2.VideoCapture(0)
+    ret, frame = camera.read()
+    barcode_text=""
+    while ret:
+        ret, frame = camera.read()
+        barcodes = pyzbar.decode(frame)
+        for barcode in barcodes:
+           x, y , w, h = barcode.rect
+           barcode_text = barcode.data.decode('utf-8')
+           #print(barcode_text)
+           return barcode_text
+           cv2.rectangle(frame, (x, y),(x+w, y+h), (0, 255, 0), 2)
+        cv2.imshow('Barcode reader', frame)
+        if cv2.waitKey(1) and barcode_text!="": #0xFF == 27:
+            break
 # free camera object and exit
 cap.release()
 cv2.destroyAllWindows()
@@ -87,7 +78,7 @@ def isGuest(x):
     #call readUsr() to check if the user is guest or not / if true todb will be used else updb
     x = readUsr()
     userdata = {"username": x}
-    resp = requests.get('https://itemp.ml/isguest.php', params=userdata, headers={"User-agent":"ab"})
+    resp = requests.get('https://itemp.ml/app/isguest.php', params=userdata, headers={"User-agent":"ab"})
     #print(resp.text)
     if resp.text == 1:
         return True
@@ -99,7 +90,7 @@ def isGuest(x):
 def toDb(usr, tempp):
     # send the new temp to the db
     userdata = {"username": usr, "temp": tempp}
-    resp = requests.get('https://itemp.ml/todb.php', params=userdata, headers={"User-agent":"ab"})
+    resp = requests.get('https://itemp.ml/app/todb.php', params=userdata, headers={"User-agent":"ab"})
     #print(resp.status_code)
     #print(resp.text)
 
@@ -107,6 +98,6 @@ def toDb(usr, tempp):
 def upDb(usr, tempp):
     # send the new temp to the db
     userdata = {"username": usr, "temp": tempp}
-    resp = requests.get('https://itemp.ml/updb.php', params=userdata, headers={"User-agent":"ab"})
+    resp = requests.get('https://itemp.ml/app/updb.php', params=userdata, headers={"User-agent":"ab"})
     #print(resp.status_code)
     #print(resp.text)
