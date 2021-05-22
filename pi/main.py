@@ -5,117 +5,188 @@ import busio
 import board
 import adafruit_amg88xx
 import requests
+import socket
 from statistics import mean
 from pyzbar import pyzbar
 from pydub import AudioSegment
 from pydub.playback import play
 
 
-i2c = busio.I2C(board.SCL, board.SDA)
-amg = adafruit_amg88xx.AMG88XX(i2c)
+try:
+    i2c = busio.I2C(board.SCL, board.SDA)
+    amg = adafruit_amg88xx.AMG88XX(i2c)
+except:
+    alrt = AudioSegment.from_wav("alert.wav")
+    play(alrt)
+    print("Couldn't load AMG88XX sensor, please try to reattach the it")
 
-# checking the username from  qr reader is mandatory for the temp to run
-# the code should be waiting the user to inter qr code infront of cam
+
+def isConnected():
+    try:
+        sock = socket.create_connection(("www.google.com", 80))
+        if sock is not None:
+            sock.close
+        return True
+    except OSError:
+        pass
+        return False
 
 
-#Scan usernames from QR reader RETURN username
+#Scan usernames from QR reader RETURN username OR fullname & phone for guests
 def readUsr():
     camera = cv2.VideoCapture(0)
     ret, frame = camera.read()
-    barcode_text=""
+    text = ""
     while ret:
         ret, frame = camera.read()
         barcodes = pyzbar.decode(frame)
         for barcode in barcodes:
             x, y , w, h = barcode.rect
-            barcode_text = barcode.data.decode('utf-8')
-            #print(barcode_text)
-            return barcode_text
+            text = barcode.data.decode('utf-8')
+            return text
             cv2.rectangle(frame, (x, y),(x+w, y+h), (0, 255, 0), 2)
         cv2.imshow('Barcode reader', frame)
-        if cv2.waitKey(1) and 0xFF == 27: #barcode_text!="": 
+        if cv2.waitKey(1) and 0xFF == 27:
             break
-# free camera object and exit
     camera.release()
     cv2.destroyAllWindows()
 
 
-# Read temprature and return it
+#Reading temprature
 def tempRead():
     if True:
         for row in amg.pixels:
-            #time.sleep(0)
-            xtemp = ['{0:0.2f}'.format(temp) for temp in row]
-        rslt = list(map(float, xtemp))
+            temp = ['{0:0.2f}'.format(x) for x in row]
+        rslt = list(map(float, temp))
         avg = 0
         avg = mean(rslt)
-        #print("Average of the list =", round(avg, 2))
         if avg == 0:
-            tempRead()
-        elif avg != 0:
+            tempRead()            
+        else:
             if avg >= 35 or avg <= 40:
-                #send it to db
                 return avg
             else:
                 tempRead()
-        else:
-            return avg
 
-# Check if the user is guest or not RETUNR TRUE/FALSE
-def isGuest(x):
-    #call readUsr() to check if the user is guest or not / if true todb will be used else updb
-    #x = readUsr()
-    userdata = {"username": x}
-    resp = requests.get('https://itemp.ml/app/isguest.php', params=userdata, headers={"User-agent":"ab"})
-    #print(resp.text)
+
+#Update temp in database for regestred users, Paramaters are username & temp
+def upDb(usr, temp):
+    userdata = {"username": usr, "temp": temp}
+    resp = requests.get('https://itemp.ml/app/updb.php', params=userdata, headers={"User-agent":"ab"})
+    #return(resp.text)
+
+
+#Check if the guest already in database or not   
+def checkDb(num):
+    userdata = {"phone": num}
+    resp = requests.get('https://itemp.ml/app/phonesearch.php', params=userdata, headers={"User-agent":"ab"})
     if resp.text == "1":
         return True
     else:
         return False
 
-
-# Sends temp to database, Paramaters are username & temp   #for guests
-def toDb(usr, tempp):
-    # send the new temp to the db
-    userdata = {"username": usr, "temp": tempp}
-    resp = requests.get('https://itemp.ml/app/todb.php', params=userdata, headers={"User-agent":"ab"})
-    #print(resp.status_code)
-    return(resp.text)
-
-# Update updated temp to database, Paramaters are username & temp  #for regestred users
-def upDb(usr, tempp):
-    # send the new temp to the db
-    userdata = {"username": usr, "temp": tempp}
-    resp = requests.get('https://itemp.ml/app/updb.php', params=userdata, headers={"User-agent":"ab"})
-    #print(resp.status_code)
-    return(resp.text)
     
+#Sends temp to database for guests, Paramaters are username & temp
+def instoGuest(fname, num, temp):
+    userdata = {"fullname": fname,"phone": num, "temp": temp}
+    resp = requests.get('https://itemp.ml/app/instodb.php', params=userdata, headers={"User-agent":"ab"})
+    #return(resp.text)
 
-def main():
+
+#Update new temp to database for guests, Paramaters are username & temp
+def updGuest(phn, temp):
+    userdata = {"phone": phn, "temp": temp}
+    resp = requests.get('https://itemp.ml/app/updateexistngguest.php', params=userdata, headers={"User-agent":"ab"})
+    #return(resp.text)
+
+def saveToFileGst(fname, phn, temp):
+    g=open("guests.txt","a")
+    data = {"Full Name": fname, "Phone" : phn , "Temp": temp}
+    s = str(data)
+    g.write(str(s+"\n"))
+    g.close()
+
+
+def saveToFileUsr(uname, temp):
+    f=open("users.txt","a")
+    d = {"Username": uname, "Temp": temp}
+    s = str(d)
+    f.write(str(s+"\n"))
+    f.close()
+
+
+def onMain():
+    succ = AudioSegment.from_wav("ok.wav")
+    alrt = AudioSegment.from_wav("alert.wav")
+    hight = AudioSegment.from_wav("hightemp.wav")
     u = readUsr()
-    #tempRead()
-    g = isGuest(u)
-    if g == True:
-        t = tempRead()
+    t = tempRead()
+    if ',' in u:
+        s = u.split(",")
+        fname = (s[0])
+        phone = (s[1])
+        c = checkDb(phone)
         if t >= 36 or t <= 38:
-            song = AudioSegment.from_wav("ok.wav")
-            play(song)
+            if c == True:
+                updGuest(phone, t)
+                play(succ)
+                time.sleep(1)
+                main()
+            else :
+                instoGuest(fname, phone, t)
+                play(succ)
+                time.sleep(1)
+                main()
+        else:
+            play(hight)
+            time.sleep(1)
+            main()
+    else:
+        if t >= 36 or t <= 38:
             upDb(u, t)
+            play(succ)
+            time.sleep(1)
             main()
         else:
-            song = AudioSegment.from_wav("err.wav")
-            play(song)
+            play(hight)
+            time.sleep(1)
             main()
-    if g == False:
-        t = tempRead()
+
+def offMain():
+    #read usr and temp without DB checking, save to txt file
+    succ = AudioSegment.from_wav("ok.wav")
+    alrt = AudioSegment.from_wav("alert.wav")
+    u = readUsr()
+    t = tempRead()
+    if "," in u:
+        s = u.split(",")
+        fname = (s[0])
+        phone = (s[1])
         if t >= 36 or t <= 38:
-            song = AudioSegment.from_wav("ok.wav")
-            play(song)
-            toDb(u, t)
+            saveToFileGst(fname, phone, t)
+            play(succ)
+            time.sleep(1)
             main()
         else:
-            song = AudioSegment.from_wav("err.wav")
-            play(song)
+            play(hight)
+            time.sleep(1)
+            main()
+    else:
+        if t >= 36 or t <= 38:
+            saveToFileUsr(u, t)
+            play(succ)
+            time.sleep(1)
             main()
             
+        else:
+            play(hight)
+            time.sleep(1)
+            main()
+
+def main():
+    if isConnected() == True:
+        onMain()
+    else:
+        offMain()
+
 main()
