@@ -57,6 +57,7 @@ def readTemp():
         else:
             readTemp()
 
+#Send guest temperature to database
 def upGst(temp):
     try:
         userdata = {"temp": temp}
@@ -134,6 +135,7 @@ def onMain():
             upGst(t)
         except:
             saveToFileGst(t)
+            main()
         time.sleep(2)
         main()
     else:
