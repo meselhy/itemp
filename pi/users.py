@@ -28,7 +28,7 @@ def isConnected():
     except OSError:
         pass
         return False
-
+#Read RFID data
 def readR():
     try:
         id, text=reading.read()
@@ -66,11 +66,23 @@ def readTemp():
         else:
             readTemp()
 
+#Check user id in database
+def isUsr(usrid):
+    try:
+        userdata = {"uid": usrid}
+        resp = requests.get('https://itemp.ml/app/isusr.php', params=userdata, headers={"User-agent":"ab"})
+        if resp.text == "1":
+            return True
+        else:
+            return False
+    except:
+        return True
+        
 #Update temp in database for registred users, Paramaters are userid & temp
 def upUser(usr, temp):
     try:
         userdata = {"userid": usr, "temp": temp}
-        resp = requests.get('https://itemp.ml/app/updb.php', params=userdata, headers={"User-agent":"ab"})
+        requests.get('https://itemp.ml/app/updb.php', params=userdata, headers={"User-agent":"ab"})
     except:
         saveToFileUsr(usr, temp)
 
@@ -102,7 +114,6 @@ def gLed():
         time.sleep(0.1)
         GPIO.output(green,False)
         time.sleep(0.1)
-        i+1
     GPIO.cleanup()
 
 def gBlink():
@@ -110,13 +121,13 @@ def gBlink():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(green, GPIO.OUT)
     i=0
-    for i in range(3):
+    for i in range(4):
         GPIO.output(green,True)
         time.sleep(0.1)
         GPIO.output(green,False)
         time.sleep(0.1)
-        i+1
     GPIO.cleanup()
+    
 def gBlink2():
     green = 13
     GPIO.setmode(GPIO.BCM)
@@ -127,7 +138,6 @@ def gBlink2():
         time.sleep(0.1)
         GPIO.output(green,False)
         time.sleep(0.1)
-        i+1
     GPIO.cleanup()
 
 def rBlink():
@@ -140,36 +150,48 @@ def rBlink():
         time.sleep(0.1)
         GPIO.output(red,False)
         time.sleep(0.1)
-        i+1
     GPIO.cleanup()
 
+def rBlink2():
+    red = 12
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(red, GPIO.OUT)
+    i=0
+    for i in range(2):
+        GPIO.output(red,True)
+        time.sleep(0.1)
+        GPIO.output(red,False)
+        time.sleep(0.1)
+    GPIO.cleanup()
 
 #Online
 def onMain():
     gBlink2()
     u = str(readR())
-    if not u.isdigit():
-        rBlink()
-        onMain()
-    print("User : " + u)
-    gBlink()
-    time.sleep(1)
-    t = readTemp()
-    if t <= 37.7:
-        t2=str(t)
-        gLed()
-        print("Temperature is " + t2 + " degrees, Door Opened!")
-        try:
-            upUser(u, t)
-        except:
-            saveToFileUsr(u, t)
+    if isUsr(u) == False:
+        rBlink2()
         main()
     else:
-        t2=str(t)
-        rLed()
-        print("Temperature is " + t2 + " degrees, Door Closed!")
+        print("User : " + u)
+        gBlink()
         time.sleep(1)
-        main()
+        t = readTemp()
+        if t <= 37.7:
+            t2=str(t)
+            gLed()
+            print("Temperature is " + t2 + " degrees, Door Opened!")
+            try:
+                upUser(u, t)
+            except:
+                saveToFileUsr(u, t)
+                main()
+            main()
+        else:
+            t2=str(t)
+            rLed()
+            print("Temperature is " + t2 + " degrees, Door Closed!")
+            time.sleep(1)
+            main()
 
 #Offline
 def offMain():
