@@ -46,32 +46,17 @@ def readTemp():
         t = (teF+flF) /2
         t = round(t, 2)
         if t != 0:            
-            if t >= 36 and t <= 40:#36  40
+            if t >= 36 and t <= 40:
                 return round(t, 2)
-            elif t >= 34.2 and t <= 35.9:#35   36
+            elif t >= 34.2 and t <= 35.9:
                 return round(t + 2.2, 2)
-            elif t >= 31.5 and t <= 34.2:#32.9  35.9
+            elif t >= 31.5 and t <= 34.2:
                 return round(t + 3.6, 2)
             else:
                 readTemp()
         else:
             readTemp()
 
-#Send guest temperature to database
-def upGst(temp):
-    try:
-        userdata = {"temp": temp}
-        resp = requests.get('https://itemp.ml/app/upgst.php', params=userdata, headers={"User-agent":"ab"})
-    except:
-        saveToFileGst(temp)
-    
-#Save users data in txt file
-def saveToFileGst(temp):
-    f = open("gst.txt","a")
-    d = {"Temp": temp}
-    s = str(d)
-    f.write(str(s+"\n"))
-    f.close()
 
 def rLed():
     red = 12
@@ -123,51 +108,21 @@ def rBlink():
     GPIO.cleanup()
 
 
-#Online
-def onMain():
-    gBlink()
-    t = readTemp()
-    if t <= 37.7:
-        t2=str(t)
-        gLed()
-        print("Temperature is " + t2 + " degrees, Door Opened!")
-        try:
-            upGst(t)
-        except:
-            saveToFileGst(t)
-            main()
-        time.sleep(2)
-        main()
-    else:
-        t2=str(t)
-        rLed()
-        print("Temperature is " + t2 + " degrees, Door Closed!")
-        time.sleep(2)
-        main()
-
-#Offline
-def offMain():
-    gBlink()
-    t = readTemp()
-    if t <= 37.7:
-        t2=str(t)
-        gLed()
-        print("Temperature is " + t2 + " degrees, Door Opened!")
-        saveToFileGst(t)
-        time.sleep(2)
-        main()           
-    else:
-        t2=str(t)
-        rLed()
-        print("Temperature is " + t2 + " degrees, Door Closed!")
-        time.sleep(2)
-        main()
-
 #Main
 def main():
-    if isConnected() == True:
-        onMain()
+    gBlink()
+    t = readTemp()
+    if t <= 37.7:
+        t2=str(t)
+        gLed()
+        print("Temperature is " + t2 + " degrees, Door Opened!")
+        time.sleep(2)
+        main()
     else:
-        offMain()
+        t2=str(t)
+        rLed()
+        print("Temperature is " + t2 + " degrees, Door Closed!")
+        time.sleep(2)
+        main()
 
 main()
