@@ -55,11 +55,11 @@ def readTemp():
         t = (teF+flF) /2
         t = round(t, 2)
         if t != 0:            
-            if t >= 36 and t <= 40:#36  40
+            if t >= 36 and t <= 40:
                 return round(t, 2)
-            elif t >= 34.2 and t <= 35.9:#35   36
+            elif t >= 34.2 and t <= 35.9:
                 return round(t + 2.2, 2)
-            elif t >= 31.5 and t <= 34.2:#32.9  35.9
+            elif t >= 31.5 and t <= 34.2:
                 return round(t + 3.6, 2)
             else:
                 readTemp()
