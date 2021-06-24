@@ -15,13 +15,12 @@
 <h1>WELCOME ADMIN</h1><br><br>
 <table id="customers" border="2">
   <tr>
-    <th>id</th>
-    <th>Name</th>
-    <th>Surname</th>
-	<th>PhoneNumber</th>
-	<th>Temperature</th>
-	<th>Username</th>
-	<th>Password</th>
+    <th>userid</th>
+    <th>first_name</th>
+	<th>last_name</th>
+	<th>temp</th>
+	<th>device</th>
+	<th>gate</th>
 	
 
   </tr>
@@ -38,15 +37,12 @@ while($data = mysqli_fetch_array($records))
 ?>
 
   <tr>
-    <td><?php echo $data['id']; ?></td>
-    <td><?php echo $data['Name']; ?></td>
-    <td><?php echo $data['Surname']; ?></td>  
-    <td><?php echo $data['PhoneNumber']; ?></td>
-    <td><?php echo $data['Temperature']; ?></td>
-    <td><?php echo $data['Username']; ?></td> 
-    <td><?php echo $data['Password']; ?></td>    
-	
-
+    <td><?php echo $data['userid']; ?></td>
+    <td><?php echo $data['first_name']; ?></td>  
+    <td><?php echo $data['last_name']; ?></td>
+    <td><?php echo $data['temp']; ?></td>
+    <td><?php echo $data['device']; ?></td>
+    <td><?php echo $data['gate']; ?></td>
   </tr>	
 
 <?php
