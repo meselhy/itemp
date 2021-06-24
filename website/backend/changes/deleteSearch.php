@@ -5,19 +5,19 @@ if(isset($_POST['search']))
     $valueToSearch = $_POST['valueToSearch'];
     // search in all table columns
     // using concat mysql function
-    $query = "SELECT * FROM `information` WHERE CONCAT(`id`, `Name`, `Surname`, `PhoneNumber`) LIKE '%".$valueToSearch."%'";
+    $query = "SELECT * FROM `users` WHERE CONCAT(`id`, `first_name`, `last_name`, `temp`, `device`, `gate`, `time`) LIKE '%".$valueToSearch."%'";
     $search_result = filterTable($query);
     
 }
  else {
-    $query = "SELECT * FROM `information`";
+    $query = "SELECT * FROM `users`";
     $search_result = filterTable($query);
 }
 
 // function to connect and execute the query
 function filterTable($query)
 {
-    $connect = mysqli_connect("localhost", "root", "", "capstone");
+    $connect = mysqli_connect("localhost", "gtconlin_rooot", "meselhy", "gtconlin_itemp");
     $filter_Result = mysqli_query($connect, $query);
     return $filter_Result;
 }
@@ -49,10 +49,13 @@ function filterTable($query)
             
             <table id=update3>
                 <tr>
-                    <th>Id</th>
+                    <th>UserId</th>
                     <th>First Name</th>
                     <th>Last Name</th>
-                    <th>Age</th>
+                    <th>Temp</th>
+			<th>Device</th>
+			<th>Gate</th>
+			<th>Time</th>
 					    <th><p style="color:black">EDIT</p></th>
 
                 </tr>
@@ -60,10 +63,13 @@ function filterTable($query)
       <!-- populate table from mysql database -->
                 <?php while($row = mysqli_fetch_array($search_result)):?>
                 <tr>
-                    <td><?php echo $row['id'];?></td>
-                    <td><?php echo $row['Name'];?></td>
-                    <td><?php echo $row['Surname'];?></td>
-                    <td><?php echo $row['PhoneNumber'];?></td>
+                    <td><?php echo $row['userid'];?></td>
+                    <td><?php echo $row['first_name'];?></td>
+                    <td><?php echo $row['last_name'];?></td>
+			<td><?php echo $row['temp'];?></td>
+			<td><?php echo $row['device'];?></td>
+			<td><?php echo $row['gate'];?></td>
+			<td><?php echo $row['time'];?></td>
                     <td> <p style="color:green"><button><a href='delete.php?id=<?php echo $row['id'];?>'>DELETE</button> </p></a></td>
 
 
