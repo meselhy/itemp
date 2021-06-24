@@ -43,7 +43,7 @@ function filterTable($query)
     </head>
     <body>
         
-        <form action="search.php" method="post">
+        <form action="deleteSearch.php" method="post">
             <input type="text" name="valueToSearch" placeholder="Value To Search"><br><br>
             <input type="submit" name="search" value="Filter"><br><br>
             
@@ -53,7 +53,7 @@ function filterTable($query)
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Age</th>
-					    <th><p style="color:black">EDIT</p></th>
+					    <th><p style="color:black">DELETE</p></th>
 
                 </tr>
 
@@ -64,7 +64,7 @@ function filterTable($query)
                     <td><?php echo $row['Name'];?></td>
                     <td><?php echo $row['Surname'];?></td>
                     <td><?php echo $row['PhoneNumber'];?></td>
-                    <td> <p style="color:green"><button><a href='edit.php?id=<?php echo $row['id'];?>'>EDIT</button> </p></a></td>
+                    <td> <p style="color:green"><button><a href='delete1.php?id=<?php echo $row['id'];?>'>DELETE</button> </p></a></td>
 
 
                 </tr>

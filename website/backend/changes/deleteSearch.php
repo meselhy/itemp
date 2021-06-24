@@ -64,7 +64,7 @@ function filterTable($query)
                     <td><?php echo $row['Name'];?></td>
                     <td><?php echo $row['Surname'];?></td>
                     <td><?php echo $row['PhoneNumber'];?></td>
-                    <td> <p style="color:green"><button><a href='edit.php?id=<?php echo $row['id'];?>'>EDIT</button> </p></a></td>
+                    <td> <p style="color:green"><button><a href='delete.php?id=<?php echo $row['id'];?>'>DELETE</button> </p></a></td>
 
 
                 </tr>
