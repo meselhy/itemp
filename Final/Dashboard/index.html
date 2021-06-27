@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" href="login.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<title>Login Page</title>
+
+<script>
+var login = function() {
+$(document).ready(function(){
+    var username = $("#username").val().trim();
+    var password = $("#password").val().trim();
+
+if(username === "" || password === ""){
+    alert('How can you login without username & password?');
+    //return false;
+}else{
+    $.ajax({
+      type : 'POST',
+      url  : 'login.php',
+      data:{username:username,password:password},
+      success : function(response){
+        var msg = "";
+            if(response == 1){
+                window.location='home.php';
+            }else{
+                alert("Invalid username / password");
+            }
+       }
+    });
+   }
+});
+};
+</script>
+</head>
+<body>
+
+		<div class="login-box">
+			<h1>Login</h1>
+
+			<div class="textbox">
+				<i class="fa fa-user" aria-hidden="true"></i>
+				<input type="text" placeholder="Username"
+						id="username" name="username" value="">
+			</div>
+
+			<div class="textbox">
+				<i class="fa fa-lock" aria-hidden="true"></i>
+				<input type="password" placeholder="Password"
+						id="password" name="password" value="">
+			</div>
+
+			<input class="button" type="submit"
+					name="login" value="Sign In" onclick="login()">
+		</div>
+	
+</body>
+
+</html>
