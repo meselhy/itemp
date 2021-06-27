@@ -1,1 +1,2 @@
-
+When upuser.php is called by python code, it updates the temperature of the user, if it updated successfuly, it calls log.php file to save this user's data
+in log table.
