@@ -1,1 +1,6 @@
+To test offline mode while having internet connection for file users.py:
+On line 225 "if isConnected() == True:" Change True to False.
 
+
+To test if the user is not in database:
+On line 175 "if isUser(u) == False:" Change False to True.
