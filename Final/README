@@ -2,6 +2,9 @@ Final Codes Of The Project
 
 
 Dashboard is admin portal for managing database.
+Python code is the code on Raspberry side.
+REST is the connection between python code and the database.
+
 
 Everything is working perfectly.
 Just follow the guidlines to make sure you are doing the right steps.
