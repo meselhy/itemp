@@ -1,9 +1,6 @@
 <?PHP
 include "config.php";
 
-//$userid = htmlspecialchars($_GET["userid"]);
-//$temperature = htmlspecialchars($_GET["temperature"]);
-
 try
 { 
     if ($userid != "")
